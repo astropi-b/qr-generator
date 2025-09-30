@@ -29,14 +29,23 @@ qr.make(fit=True)
 img = qr.make_image(fill_color=fill_color, back_color=back_color).convert("RGB")
 
 # --- Add Creator Name ---
-draw = ImageDraw.Draw(img)
-font = ImageFont.load_default()
 text = "Anumanchi Agastya Sai Ram Likhit"
-text_width, text_height = draw.textsize(text, font=font)
+font = ImageFont.load_default()
+
+# Use textbbox instead of deprecated textsize
+draw = ImageDraw.Draw(img)
+bbox = draw.textbbox((0, 0), text, font=font)
+text_width, text_height = bbox[2] - bbox[0], bbox[3] - bbox[1]
+
+# Make new canvas taller to fit text
 canvas = Image.new("RGB", (img.size[0], img.size[1] + 40), back_color)
 canvas.paste(img, (0, 0))
 draw = ImageDraw.Draw(canvas)
-draw.text(((canvas.size[0] - text_width) // 2, img.size[1] + 5), text, font=font, fill=fill_color)
+
+# Draw text centered
+x = (canvas.size[0] - text_width) // 2
+y = img.size[1] + 5
+draw.text((x, y), text, font=font, fill=fill_color)
 
 # --- Display QR ---
 st.image(canvas, caption="Generated QR Code", use_column_width=True)
